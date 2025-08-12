@@ -1,6 +1,4 @@
-﻿namespace Send;
-
-internal class RabbitmqSettings
+﻿internal class RabbitmqSettings
 {
 	public string? HostName { get; set; }
 	public string? UserName { get; set; }
@@ -8,3 +6,4 @@ internal class RabbitmqSettings
 
 	public override string ToString() => $"{HostName}:{UserName}:{Password}";
 }
+

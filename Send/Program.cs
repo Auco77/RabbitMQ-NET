@@ -23,12 +23,13 @@ using var channel = await connection.CreateChannelAsync();
 
 await channel.QueueDeclareAsync(queue: "hello", durable: false, exclusive: false, autoDelete: false, arguments: null);
 
-var hasMoreMessage = true;
-
-while (hasMoreMessage)
+while (true)
 {
-	Console.WriteLine("Write a Message to Send");
+	Console.WriteLine("Write a Message to Send (type 'XXX' to exit)");
 	var newMsg = Console.ReadLine();
+
+	if (newMsg?.ToUpper() == "XXX")
+		break;
 
 	if (newMsg != null)
 	{
@@ -37,10 +38,8 @@ while (hasMoreMessage)
 		Console.WriteLine("Message Sent");
 	}
 
-	Console.WriteLine("Do you want send more message (Y/n)");
-	hasMoreMessage = Console.ReadLine()?.ToUpper() != "N";
 }
 
-Console.WriteLine(" Press [Enter] to exit");
+Console.WriteLine("***END***\nPress [Enter] to exit");
 Console.ReadLine();
 
