@@ -1,8 +1,24 @@
-﻿using RabbitMQ.Client;
+﻿using Microsoft.Extensions.Configuration;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Receive;
 using System.Text;
 
-var factory = new ConnectionFactory { HostName = "localhost", UserName = "user01", Password = "auco^(x@user01" };
+var builder = new ConfigurationBuilder();
+builder.SetBasePath(Directory.GetCurrentDirectory())
+	.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+IConfigurationRoot config = builder.Build();
+var rabbitmqSettings = new RabbitmqSettings();
+config.GetSection("RabbitMQ").Bind(rabbitmqSettings);
+
+var _hostName = rabbitmqSettings.HostName ?? "<NULL>";
+var _userName = rabbitmqSettings.UserName ?? "<NULL>";
+var _pwd = rabbitmqSettings.Password ?? "<NULL>";
+
+Console.WriteLine($"Try connect to {_hostName} @ {_userName} :: {_pwd}");
+
+var factory = new ConnectionFactory { HostName = _hostName, UserName = _userName, Password = _pwd };
 using var connection = await factory.CreateConnectionAsync();
 using var channel = await connection.CreateChannelAsync();
 
