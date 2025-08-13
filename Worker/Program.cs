@@ -37,10 +37,12 @@ consumer.ReceivedAsync += async (model, ea) =>
 	int dots = message.Split('.').Length;
 	await Task.Delay(dots * 1000);
 
-	Console.WriteLine(" \t✅ Done");
+	Console.WriteLine("\t✅ Done");
+
+	await channel.BasicAckAsync(deliveryTag: ea.DeliveryTag, multiple: false);
 };
 
-await channel.BasicConsumeAsync("hello", autoAck: true, consumer: consumer);
+await channel.BasicConsumeAsync("hello", autoAck: false, consumer: consumer);
 
 Console.WriteLine(" Press [Enter] to exit.");
 Console.ReadLine();
