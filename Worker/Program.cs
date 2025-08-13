@@ -23,7 +23,8 @@ using var channel = await connection.CreateChannelAsync();
 
 //Note that we declare the queue here as well. Because we might start the consumer before the publisher,
 //we want to make sure the queue exists before we try to consume messages from it.
-await channel.QueueDeclareAsync(queue: "hello", durable: false, exclusive: false, autoDelete: false, arguments: null);
+await channel.QueueDeclareAsync(queue: "task_durable", durable: true, exclusive: false, autoDelete: false, arguments: null);
+await channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
 
 Console.WriteLine(" 🥱 Waiting for Messages");
 
@@ -42,7 +43,7 @@ consumer.ReceivedAsync += async (model, ea) =>
 	await channel.BasicAckAsync(deliveryTag: ea.DeliveryTag, multiple: false);
 };
 
-await channel.BasicConsumeAsync("hello", autoAck: false, consumer: consumer);
+await channel.BasicConsumeAsync("task_durable", autoAck: false, consumer: consumer);
 
 Console.WriteLine(" Press [Enter] to exit.");
 Console.ReadLine();

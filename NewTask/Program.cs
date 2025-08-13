@@ -20,12 +20,15 @@ var factory = new ConnectionFactory
 using var connection = await factory.CreateConnectionAsync();
 using var channel = await connection.CreateChannelAsync();
 
-await channel.QueueDeclareAsync(queue: "hello", durable: false, exclusive: false, autoDelete: false, arguments: null);
+await channel.QueueDeclareAsync(queue: "task_durable", durable: true, exclusive: false, autoDelete: false, arguments: null);
 
 var message = GetMessage(args);
 var body = Encoding.UTF8.GetBytes(message);
 
-await channel.BasicPublishAsync(exchange: string.Empty, routingKey: "hello", body: body);
+var properties = new BasicProperties { Persistent = true };
+
+await channel.BasicPublishAsync(exchange: string.Empty, routingKey: "task_durable", mandatory: true, basicProperties: properties, body: body);
+
 Console.WriteLine($" [x] Sent {message}");
 
 static string GetMessage(string[] args)
