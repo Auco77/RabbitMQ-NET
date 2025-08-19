@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "PubSub-Sub-LogsDisplay": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

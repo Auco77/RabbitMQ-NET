@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using System.Text;
 
 var configBuilder = new ConfigurationBuilder();
@@ -20,12 +21,24 @@ var factory = new ConnectionFactory
 using var connection = await factory.CreateConnectionAsync();
 using var channel = await connection.CreateChannelAsync();
 
-await channel.ExchangeDeclareAsync(exchange: "logs", type: ExchangeType.Fanout);
+await channel.ExchangeDeclareAsync(exchange: "logs", ExchangeType.Fanout);
 
-var message = GetMessage(args);
-var body = Encoding.UTF8.GetBytes(message);
-await channel.BasicPublishAsync(exchange: "logs", routingKey: "", body: body);
+QueueDeclareOk queueDeclareResult = await channel.QueueDeclareAsync();
+string queueName = queueDeclareResult.QueueName;
 
-Console.WriteLine($" 📨 Sent {message}");
+await channel.QueueBindAsync(queue: queueName, exchange: "logs", routingKey: "");
 
-static string GetMessage(string[] args) => ((args.Length > 0) ? string.Join(" ", args) : "info: Hello World!");
+Console.WriteLine(" 🥱 Waiting for Logs...");
+
+var consumer = new AsyncEventingBasicConsumer(channel);
+consumer.ReceivedAsync += (model, ea) => {
+	byte[] body = ea.Body.ToArray();
+	var message = Encoding.UTF8.GetString(body);
+	Console.WriteLine($"\t📩 {message}");
+	return Task.CompletedTask;
+};
+
+await channel.BasicConsumeAsync(queueName, autoAck:true, consumer: consumer);
+
+Console.WriteLine(" Press [enter] to exit.");
+Console.ReadLine();
